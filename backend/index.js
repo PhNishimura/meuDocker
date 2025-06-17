@@ -3,8 +3,19 @@ const cors = require('cors');
 const app = express();
 const port = 3001;
 
+// Configuração mais específica do CORS para maior segurança
+const corsOptions = {
+  origin: ['http://localhost:8080', 'http://127.0.0.1:8080', 'http://172.19.231.181:8080'],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
 // Middleware que aplica os cabeçalhos de permissão CORS
-app.use(cors());
+app.use(cors(corsOptions));
+
+// Middleware para parsing JSON
+app.use(express.json());
 
 // Rota para verificar se o serviço está online
 app.get('/', (req, res) => {
@@ -20,6 +31,6 @@ app.get('/data', (req, res) => {
   res.json(sampleData);
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Backend simples rodando na porta ${port}`);
 });
