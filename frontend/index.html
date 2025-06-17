@@ -23,7 +23,8 @@
     document.getElementById('fetch-btn').addEventListener('click', async () => {
       const dataContainer = document.getElementById('data-container');
       const dataPre = document.getElementById('data-pre');
-      const apiURL = `http://${window.location.hostname}:3000/data`;
+      // Corrigido: usando a porta 3001 que está mapeada no docker-compose
+      const apiURL = `http://${window.location.hostname}:3001/data`;
       try {
         const response = await fetch(apiURL);
         if (!response.ok) { throw new Error(`Erro na rede: ${response.statusText}`); }
