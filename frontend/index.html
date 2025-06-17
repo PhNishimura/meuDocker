@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Consulta de usuários - cadastrados</title>
+  <style>
+    body { font-family: sans-serif; background-color: #282a36; color: #f8f8f2; text-align: center; padding-top: 50px; }
+    h1 { color: #50fa7b; }
+    button { background-color: #bd93f9; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    #data-container { background-color: #44475a; margin: 30px auto; padding: 20px; border-radius: 8px; max-width: 600px; text-align: left; }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+  </style>
+</head>
+<body>
+  <h1>Aplicação Distribuída com Docker Swarm</h1>
+  <p>Clique no botão para buscar dados dos usuarios no backend.</p>
+  <button id="fetch-btn">Buscar Dados</button>
+  <div id="data-container" style="display:none;">
+    <h2>Dados Recebidos do Backend:</h2>
+    <pre id="data-pre"></pre>
+  </div>
+  <script>
+    document.getElementById('fetch-btn').addEventListener('click', async () => {
+      const dataContainer = document.getElementById('data-container');
+      const dataPre = document.getElementById('data-pre');
+      const apiURL = `http://${window.location.hostname}:3000/data`;
+      try {
+        const response = await fetch(apiURL);
+        if (!response.ok) { throw new Error(`Erro na rede: ${response.statusText}`); }
+        const data = await response.json();
+        dataPre.textContent = JSON.stringify(data, null, 2);
+        dataContainer.style.display = 'block';
+      } catch (error) {
+        dataPre.textContent = `Falha ao buscar dados: ${error.message}`;
+        dataContainer.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
