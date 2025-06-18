@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: pedrobachaalani1701/trabalho-backend:7.0
+    image: pedrobachaalani1701/trabalho-backend:8.0
     ports:
       - "3001:3001"
     deploy:
@@ -29,6 +29,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    environment:
+      - NODE_ENV=production
 
   frontend:
     image: pedrobachaalani1701/trabalho-frontend:4.0
