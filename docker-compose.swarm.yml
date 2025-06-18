@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  backend:
+    image: pedrobachaalani1701/trabalho-backend:5.0
+    ports:
+      - "3001:3001"
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+      placement:
+        constraints:
+          - node.role == worker
+    networks:
+      - app-network
+
+  frontend:
+    image: pedrobachaalani1701/trabalho-frontend:2.0
+    ports:
+      - "8080:80"
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+      placement:
+        constraints:
+          - node.role == worker
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: overlay
+    attachable: true
+
+# Configuração de volumes para persistência (opcional)
+volumes:
+  app-data:
+    driver: local
