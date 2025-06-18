@@ -6,35 +6,94 @@
   <style>
     body { font-family: sans-serif; background-color: #282a36; color: #f8f8f2; text-align: center; padding-top: 50px; }
     h1 { color: #50fa7b; }
-    button { background-color: #bd93f9; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    button { background-color: #bd93f9; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 5px; }
+    button:hover { background-color: #9580ff; }
+    button:disabled { background-color: #6272a4; cursor: not-allowed; }
     #data-container { background-color: #44475a; margin: 30px auto; padding: 20px; border-radius: 8px; max-width: 600px; text-align: left; }
     pre { white-space: pre-wrap; word-wrap: break-word; }
+    .loading { color: #ffb86c; }
+    .error { color: #ff5555; }
+    .success { color: #50fa7b; }
+    .info { color: #8be9fd; }
   </style>
 </head>
 <body>
   <h1>Aplicação Distribuída com Docker Swarm</h1>
-  <p>Clique no botão para buscar dados dos usuarios no backend.</p>
-  <button id="fetch-btn">Buscar Dados</button>
+  <p>Clique nos botões para testar a conectividade com o backend.</p>
+  
+  <button id="test-btn">Testar Backend (/)</button>
+  <button id="fetch-btn">Buscar Dados (/data)</button>
+  <button id="health-btn">Health Check (/health)</button>
+  
   <div id="data-container" style="display:none;">
-    <h2>Dados Recebidos do Backend:</h2>
+    <h2>Resposta do Backend:</h2>
     <pre id="data-pre"></pre>
   </div>
+  
   <script>
-    document.getElementById('fetch-btn').addEventListener('click', async () => {
-      const dataContainer = document.getElementById('data-container');
-      const dataPre = document.getElementById('data-pre');
-      // Corrigido: usando a porta 3001 que está mapeada no docker-compose
-      const apiURL = `http://${window.location.hostname}:3001/data`;
-      try {
-        const response = await fetch(apiURL);
-        if (!response.ok) { throw new Error(`Erro na rede: ${response.statusText}`); }
-        const data = await response.json();
-        dataPre.textContent = JSON.stringify(data, null, 2);
-        dataContainer.style.display = 'block';
-      } catch (error) {
-        dataPre.textContent = `Falha ao buscar dados: ${error.message}`;
-        dataContainer.style.display = 'block';
-      }
+    function makeRequest(endpoint, buttonId) {
+      return async () => {
+        const dataContainer = document.getElementById('data-container');
+        const dataPre = document.getElementById('data-pre');
+        const button = document.getElementById(buttonId);
+        
+        // Desabilita o botão durante a requisição
+        button.disabled = true;
+        const originalText = button.textContent;
+        button.textContent = 'Carregando...';
+        
+        // URL do backend
+        const apiURL = `${window.location.protocol}//${window.location.hostname}:3001${endpoint}`;
+        
+        try {
+          dataPre.textContent = `Fazendo requisição para: ${apiURL}`;
+          dataPre.className = 'loading';
+          dataContainer.style.display = 'block';
+          
+          console.log('Fazendo requisição para:', apiURL);
+          
+          const response = await fetch(apiURL, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            mode: 'cors'
+          });
+          
+          console.log('Response status:', response.status);
+          console.log('Response headers:', response.headers);
+          
+          if (!response.ok) { 
+            throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`); 
+          }
+          
+          const data = await response.json();
+          dataPre.textContent = `Sucesso!\n\nURL: ${apiURL}\nStatus: ${response.status}\n\nDados:\n${JSON.stringify(data, null, 2)}`;
+          dataPre.className = 'success';
+          
+        } catch (error) {
+          console.error('Erro detalhado:', error);
+          dataPre.textContent = `Erro ao conectar com o backend:\n\nURL: ${apiURL}\nErro: ${error.message}\n\nVerifique se:\n1. O backend está rodando\n2. A porta 3001 está acessível\n3. O Docker Swarm está funcionando`;
+          dataPre.className = 'error';
+        } finally {
+          // Reabilita o botão
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+      };
+    }
+    
+    // Adiciona event listeners
+    document.getElementById('test-btn').addEventListener('click', makeRequest('/', 'test-btn'));
+    document.getElementById('fetch-btn').addEventListener('click', makeRequest('/data', 'fetch-btn'));
+    document.getElementById('health-btn').addEventListener('click', makeRequest('/health', 'health-btn'));
+    
+    // Teste automático ao carregar a página
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        console.log('Fazendo teste automático...');
+        makeRequest('/', 'test-btn')();
+      }, 1000);
     });
   </script>
 </body>

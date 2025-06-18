@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   backend:
-    image: pedrobachaalani1701/trabalho-backend:5.0
+    image: pedrobachaalani1701/trabalho-backend:7.0
     ports:
       - "3001:3001"
     deploy:
-      replicas: 3
+      replicas: 2
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -23,9 +23,15 @@ services:
           - node.role == worker
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   frontend:
-    image: pedrobachaalani1701/trabalho-frontend:2.0
+    image: pedrobachaalani1701/trabalho-frontend:4.0
     ports:
       - "8080:80"
     deploy:
@@ -46,13 +52,14 @@ services:
           - node.role == worker
     networks:
       - app-network
+    depends_on:
+      - backend
 
 networks:
   app-network:
     driver: overlay
     attachable: true
 
-# Configuração de volumes para persistência (opcional)
 volumes:
   app-data:
     driver: local
