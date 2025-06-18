@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: pedrobachaalani1701/trabalho-backend:5.0
+    image: pedrobachaalani1701/trabalho-backend:6.0
     ports:
       - "3001:3001"
     deploy:
@@ -25,7 +25,7 @@ services:
       - app-network
 
   frontend:
-    image: pedrobachaalani1701/trabalho-frontend:2.0
+    image: pedrobachaalani1701/trabalho-frontend:3.0
     ports:
       - "8080:80"
     deploy:
@@ -52,7 +52,6 @@ networks:
     driver: overlay
     attachable: true
 
-# Configuração de volumes para persistência (opcional)
 volumes:
   app-data:
     driver: local
