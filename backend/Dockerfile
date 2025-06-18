@@ -1,6 +1,9 @@
 # Usa uma imagem base oficial do Node.js
 FROM node:18-alpine
 
+# Instala wget para o health check
+RUN apk add --no-cache wget
+
 # Define o diretório de trabalho dentro do contêiner
 WORKDIR /app
 
@@ -14,7 +17,7 @@ RUN npm install
 COPY . .
 
 # Expõe a porta que o backend usa
-EXPOSE 3000
+EXPOSE 3001
 
 # Comando para iniciar a aplicação
 CMD [ "npm", "start" ]
