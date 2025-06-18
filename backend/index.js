@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express();
 const port = 3001;
 
+<<<<<<< HEAD
 // Configuração CORS mais permissiva
 app.use(cors({
   origin: '*',
@@ -10,18 +11,46 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: false
 }));
+=======
+// Configuração CORS mais permissiva para funcionar com Play with Docker
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Permite requisições sem origin (como Postman) e qualquer origin do Play with Docker
+    if (!origin || origin.includes('play-with-docker.com') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Não permitido pelo CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true
+};
+
+// Middleware que aplica os cabeçalhos de permissão CORS
+app.use(cors(corsOptions));
+
+// Middleware adicional para garantir headers CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+>>>>>>> parent of a0ec31f (Correção de Rede e Portas no Docker Swarm)
 
 // Middleware para parsing JSON
 app.use(express.json());
 
-// Log de todas as requisições para debug
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url} - Origin: ${req.headers.origin || 'none'}`);
-  next();
-});
-
 // Rota para verificar se o serviço está online
 app.get('/', (req, res) => {
+<<<<<<< HEAD
   console.log('Requisição recebida na rota /');
   res.json({ 
     status: 'Backend está online e funcionando!',
@@ -29,11 +58,13 @@ app.get('/', (req, res) => {
     port: port,
     hostname: require('os').hostname()
   });
+=======
+  res.json({ status: 'Backend está online e funcionando!' });
+>>>>>>> parent of a0ec31f (Correção de Rede e Portas no Docker Swarm)
 });
 
 // Rota que fornece os dados da aplicação
 app.get('/data', (req, res) => {
-  console.log('Requisição recebida na rota /data');
   const sampleData = [
     { id: 1, nome: 'Pedro Henrique', idade: 23 },
     { id: 2, nome: 'Mauro', idade: 39 },
@@ -43,6 +74,7 @@ app.get('/data', (req, res) => {
   res.json(sampleData);
 });
 
+<<<<<<< HEAD
 // Rota de health check
 app.get('/health', (req, res) => {
   res.json({ 
@@ -81,4 +113,9 @@ process.on('SIGINT', () => {
     console.log('Servidor fechado');
     process.exit(0);
   });
+=======
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Backend rodando na porta ${port}`);
+  console.log(`CORS configurado para Play with Docker`);
+>>>>>>> parent of a0ec31f (Correção de Rede e Portas no Docker Swarm)
 });
